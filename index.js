@@ -5,8 +5,37 @@ const nameInputElement = document.getElementById("name-input");
 const textInputElement = document.getElementById("text-input");
 const mainForm = document.querySelector(".add-form");
 
+let comments;
 
+function myFetch(text, name) {
+  console.log(text, name); return fetch("https://webdev-hw-api.vercel.app/api/v1/worittage/comments", {
+  method: "POST",
+  body: JSON.stringify({
+    text: text,
+    name: name
+  })
+})
+//.then((response) => {
+//  return response.json()
+//})
+//.then((responseData) => {
+//  comments = responseData.comments
+//  renderComments()
+//})
+}
 
+function promisFetch() {
+  return fetch("https://webdev-hw-api.vercel.app/api/v1/worittage/comments", {
+  method: "GET"
+})
+.then((response) => {
+return response.json()
+.then((responseData) => {
+comments = responseData.comments
+renderComments()
+})
+})
+}
 // Изменение лайков
 
 const changeLikesListener = () => {
@@ -24,10 +53,24 @@ const changeLikesListener = () => {
         comments[index].liked = false;
         comments[index].likes -= 1;
       }
-      renderComments();
+      renderComments();    
     });
   }
 };
+
+function formatDate() {
+  const options = {
+    year: "2-digit",
+    month: "numeric",
+    day: "numeric",
+    timezone: "UTC",
+    hour: "numeric",
+    minute: "2-digit",
+  };
+  const date = new Date().toLocaleString("ru-RU", options);
+  return date;
+}
+
 
 //Добавление комментария
 
@@ -40,15 +83,9 @@ buttonElement.addEventListener("click", () => {
     textInputElement.classList.add("error");
     return;
   }
-  const options = {
-    year: "2-digit",
-    month: "numeric",
-    day: "numeric",
-    timezone: "UTC",
-    hour: "numeric",
-    minute: "2-digit",
-  };
-  const date = new Date().toLocaleString("ru-RU", options);
+ 
+  
+  formatDate()
 
   comments.push({
     name: nameInputElement.value
@@ -62,7 +99,10 @@ buttonElement.addEventListener("click", () => {
     liked: false,
   });
 
-  renderComments();
+  myFetch(textInputElement.value, nameInputElement.value)
+  .then(() => {
+    return promisFetch()
+  })
 
   nameInputElement.value = "";
   textInputElement.value = "";
@@ -121,33 +161,19 @@ const editComment = () => {
 
 //DOM 2
 
-const comments = [
-  {
-    name: "Глеб Фокин",
-    date: "12.02.22 12:18",
-    text: "Это будет первый комментарий на этой странице",
-    likes: 3,
-    liked: false,
-  },
-  {
-    name: "Варвара Н.",
-    date: "13.02.22 19:22",
-    text: "Мне нравится как оформлена эта страница! ❤",
-    likes: 75,
-    liked: true,
-  },
-];
+
 
 //рендер-функция
 
 const renderComments = () => {
+  console.log(comments);
   const commentsHtml = comments
     .map((student, index) => {
       return `<li data-text = '&gt ${student.text} \n ${
-        student.name
+        student.author.name
       }' class="comment">
           <div class="comment-header">
-            <div>${student.name}</div>
+            <div>${student.author.name}</div>
             <div>${student.date}</div>
           </div>
           <div class="comment-body">
@@ -159,7 +185,8 @@ const renderComments = () => {
             <div class="likes">
               <span class="likes-counter">${student.likes}</span>
               <button data-index = '${index}' class="${
-        student.liked ? "like-button -active-like" : "like-button"
+        student.isLiked
+        ? "like-button -active-like" : "like-button"
       }"></button>
             </div>
           </div>
@@ -169,10 +196,10 @@ const renderComments = () => {
   listElement.innerHTML = commentsHtml;
 
   changeLikesListener();
-  /* deleteComment(); */
+  /* deleteComment(); */          
   editComment();
 };
 
-renderComments();
+promisFetch()
 buttonBlock();
 console.log("It works!");   
