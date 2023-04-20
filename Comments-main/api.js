@@ -1,4 +1,4 @@
-const hostComments = "https://webdev-hw-api.vercel.app/api/v2/olya-jacobs/comments";
+const hostComments = "https://webdev-hw-api.vercel.app/api/v2/worittage/comments";
 const hostLogin = "https://webdev-hw-api.vercel.app/api/user/login";
 const hostRegisterUser = "https://webdev-hw-api.vercel.app/api/user";
 
@@ -28,7 +28,10 @@ export function addComment(token,name, text) {
     else if (response.status === 500) {
       // alert('Сервер не отвечает');
       console.log('Сервер не отвечает');
-      throw new Error('Сервер не отвечает');
+      alert("Кажется, у вас сломался интернет, попробуйте позже");
+      //1
+    return Promise.reject(new Error("Отсутствует интернет-соединение"));
+      //throw new Error('Сервер не отвечает');
     }
   })
 }
@@ -104,4 +107,5 @@ export function deleteComment(token,id) {
       throw new Error('Прочие ошибки удаления');
     }
   })
+  
 }
